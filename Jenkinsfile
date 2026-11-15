@@ -7,6 +7,14 @@ pipeline {
     }
 
     stages {
+        stages {
+        stage('Network test') {
+            steps {
+                sh 'docker run --rm node:18 curl -sI https://github.com'
+            }
+        }
+    }
+    
         stage('Build') {
             agent {
                 docker {
