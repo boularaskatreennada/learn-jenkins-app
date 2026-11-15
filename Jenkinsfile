@@ -1,16 +1,16 @@
 pipeline {
     agent any
-    environment{
-        NETLIFY_SITE_ID = '9de2d234-993d-4613-8abe-a83aad80ec2c'
-        NETLIFY_AUTH_TOKEN = credentials 'netlify-token'
+
+    environment {
+        NETLIFY_SITE_ID = 'PASTE_YOUR_SITE_ID'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
 
     stages {
         stage('Build') {
             agent {
                 docker {
-                    image 'node:18'
-                    args '-e HTTP_PROXY=http://http.docker.internal:3128 -e HTTPS_PROXY=http://http.docker.internal:3128 -e http_proxy=http://http.docker.internal:3128 -e https_proxy=http://http.docker.internal:3128 -e npm_config_proxy=http://http.docker.internal:3128 -e npm_config_https_proxy=http://http.docker.internal:3128'
+                    image 'node:18-alpine'
                     reuseNode true
                 }
             }
@@ -29,8 +29,7 @@ pipeline {
         stage('Test') {
             agent {
                 docker {
-                    image 'node:18'
-                    args '-e HTTP_PROXY=http://http.docker.internal:3128 -e HTTPS_PROXY=http://http.docker.internal:3128 -e http_proxy=http://http.docker.internal:3128 -e https_proxy=http://http.docker.internal:3128 -e npm_config_proxy=http://http.docker.internal:3128 -e npm_config_https_proxy=http://http.docker.internal:3128'
+                    image 'node:18-alpine'
                     reuseNode true
                 }
             }
@@ -45,19 +44,25 @@ pipeline {
         stage('Deploy') {
             agent {
                 docker {
-                    image 'node:18'
-                    args '-e HTTP_PROXY=http://http.docker.internal:3128 -e HTTPS_PROXY=http://http.docker.internal:3128 -e http_proxy=http://http.docker.internal:3128 -e https_proxy=http://http.docker.internal:3128 -e npm_config_proxy=http://http.docker.internal:3128 -e npm_config_https_proxy=http://http.docker.internal:3128'
+                    image 'node:18-alpine'
                     reuseNode true
                 }
             }
             steps {
                 sh '''
-                   npx netlify --version
-                   node_modules/.bin/netlify status
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod
                 '''
             }
         }
     }
 
-    
+    post {
+        always {
+            junit 'test-results/junit.xml'
+        }
+    }
 }
