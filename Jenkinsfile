@@ -39,7 +39,7 @@ pipeline {
                     node --version
                     npm --version
 
-                    npm ci
+                    
                     npm run build
 
                     echo "Build completed!"
