@@ -1,52 +1,73 @@
+
 pipeline {
     agent any
 
     environment {
-    NETLIFY_SITE_ID = '9de2d234-993d-4613-8abe-a83aad80ec2c'
-    NETLIFY_AUTH_TOKEN = credentials('netlify-token')
-    HTTP_PROXY  = 'http://http.docker.internal:3128'
-    HTTPS_PROXY = 'http://http.docker.internal:3128'
-    NO_PROXY    = 'localhost,127.0.0.1'
+        NETLIFY_SITE_ID = '9de2d234-993d-4613-8abe-a83aad80ec2c'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
 
     stages {
-        stage('Build') {
+
+        stage('fix-permissions') {
             agent {
                 docker {
-                    image 'node:18'
+                    image 'node:18-alpine'
                     reuseNode true
-                    
+                    args '-u root'
                 }
             }
             steps {
                 sh '''
-                    ls -la
+                    chown -R 1000:1000 node_modules 2>/dev/null || true
+                '''
+            }
+        }
+
+        stage('build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    echo "Starting build..."
+
+                    ls -ls
                     node --version
                     npm --version
+
                     npm ci
                     npm run build
-                    ls -la
+
+                    echo "Build completed!"
+                    ls -ls
                 '''
             }
         }
 
-        stage('Test') {
+        stage('test') {
             agent {
                 docker {
-                    image 'node:18'
+                    image 'node:18-alpine'
                     reuseNode true
-                    
                 }
             }
             steps {
                 sh '''
+                    echo "Running tests..."
+
                     test -f build/index.html
-                    npm test
+                    npm test -- --watchAll=false
+
+                    echo "Tests completed!"
                 '''
             }
         }
 
-        stage('Deploy') {
+        stage('deploy') {
             agent {
                 docker {
                     image 'node:18'
@@ -55,25 +76,23 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli --ignore-scripts
+                    echo "Installing Netlify CLI..."
+
+                    npm install netlify-cli
 
                     node_modules/.bin/netlify --version
 
                     echo "Deploying to production..."
-                    echo "Site ID: 9de2d234-993d-4613-8abe-a83aad80ec2c"
 
                     node_modules/.bin/netlify deploy \
-                    --dir=build \
-                    --prod \
-                    --site="9de2d234-993d-4613-8abe-a83aad80ec2c"
-                '''
-    }
-}
-    }
+                        --prod \
+                        --dir=build \
+                        --site=$NETLIFY_SITE_ID \
+                        --auth=$NETLIFY_AUTH_TOKEN
 
-    post {
-        always {
-            junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
+                    echo "Deployment completed!"
+                '''
+            }
         }
     }
 }
