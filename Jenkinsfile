@@ -14,12 +14,13 @@ pipeline {
             }
         }
     }
-    
+
         stage('Build') {
             agent {
                 docker {
                     image 'node:18'
                     reuseNode true
+                    args '--dns 8.8.8.8 --dns 1.1.1.1'
                 }
             }
             steps {
@@ -39,6 +40,7 @@ pipeline {
                 docker {
                     image 'node:18'
                     reuseNode true
+                    args '--dns 8.8.8.8 --dns 1.1.1.1'
                 }
             }
             steps {
@@ -52,20 +54,21 @@ pipeline {
         stage('Deploy') {
             agent {
                 docker {
-                    image 'node:18'
-                    reuseNode true
+                   image 'node:18'
+                   reuseNode true
+                   args '--dns 8.8.8.8 --dns 1.1.1.1'
                 }
             }
             steps {
                 sh '''
-                    npm install netlify-cli
-                    node_modules/.bin/netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
+                   npm install netlify-cli --ignore-scripts
+                   node_modules/.bin/netlify --version
+                   echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                   node_modules/.bin/netlify status
+                   node_modules/.bin/netlify deploy --dir=build --prod
                 '''
             }
-        }
+}
     }
 
     post {
