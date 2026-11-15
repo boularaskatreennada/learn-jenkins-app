@@ -32,18 +32,15 @@ pipeline {
                 }
             }
             steps {
-                sh '''
-                    echo "Starting build..."
+                 sh '''
+                    echo "Installing dependencies..."
+                    npm install
 
-                    ls -ls
+                    echo "Starting build..."
                     node --version
                     npm --version
 
-                    
-                    npm run build
-
-                    echo "Build completed!"
-                    ls -ls
+                   npm run build
                 '''
             }
         }
