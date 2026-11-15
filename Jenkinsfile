@@ -6,6 +6,7 @@ pipeline {
             agent {
                 docker {
                     image 'node:18'
+                    args '-e HTTP_PROXY=http://http.docker.internal:3128 -e HTTPS_PROXY=http://http.docker.internal:3128 -e http_proxy=http://http.docker.internal:3128 -e https_proxy=http://http.docker.internal:3128'
                     reuseNode true
                 }
             }
@@ -25,6 +26,7 @@ pipeline {
             agent {
                 docker {
                     image 'node:18'
+                    args '-e HTTP_PROXY=http://http.docker.internal:3128 -e HTTPS_PROXY=http://http.docker.internal:3128 -e http_proxy=http://http.docker.internal:3128 -e https_proxy=http://http.docker.internal:3128'
                     reuseNode true
                 }
             }
@@ -40,6 +42,7 @@ pipeline {
             agent {
                 docker {
                     image 'node:18'
+                    args '-e HTTP_PROXY=http://http.docker.internal:3128 -e HTTPS_PROXY=http://http.docker.internal:3128 -e http_proxy=http://http.docker.internal:3128 -e https_proxy=http://http.docker.internal:3128'
                     reuseNode true
                 }
             }
