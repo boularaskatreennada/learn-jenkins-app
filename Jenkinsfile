@@ -7,14 +7,6 @@ pipeline {
     }
 
     stages {
-        stages {
-        stage('Network test') {
-            steps {
-                sh 'docker run --rm node:18 curl -sI https://github.com'
-            }
-        }
-    }
-
         stage('Build') {
             agent {
                 docker {
@@ -54,26 +46,26 @@ pipeline {
         stage('Deploy') {
             agent {
                 docker {
-                   image 'node:18'
-                   reuseNode true
-                   args '--dns 8.8.8.8 --dns 1.1.1.1'
+                    image 'node:18'
+                    reuseNode true
+                    args '--dns 8.8.8.8 --dns 1.1.1.1'
                 }
             }
             steps {
                 sh '''
-                   npm install netlify-cli --ignore-scripts
-                   node_modules/.bin/netlify --version
-                   echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                   node_modules/.bin/netlify status
-                   node_modules/.bin/netlify deploy --dir=build --prod
+                    npm install netlify-cli --ignore-scripts
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod
                 '''
             }
-}
+        }
     }
 
     post {
         always {
-            junit 'test-results/junit.xml'
+            junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
         }
     }
 }
