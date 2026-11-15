@@ -51,19 +51,24 @@ pipeline {
                 docker {
                     image 'node:18'
                     reuseNode true
-                    
                 }
             }
             steps {
                 sh '''
                     npm install netlify-cli --ignore-scripts
+
                     node_modules/.bin/netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
+
+                    echo "Deploying to production..."
+                    echo "Site ID: 9de2d234-993d-4613-8abe-a83aad80ec2c"
+
+                    node_modules/.bin/netlify deploy \
+                    --dir=build \
+                    --prod \
+                    --site="9de2d234-993d-4613-8abe-a83aad80ec2c"
                 '''
-            }
-        }
+    }
+}
     }
 
     post {
