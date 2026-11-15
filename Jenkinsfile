@@ -2,8 +2,11 @@ pipeline {
     agent any
 
     environment {
-        NETLIFY_SITE_ID = '9de2d234-993d-4613-8abe-a83aad80ec2c'
-        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+    NETLIFY_SITE_ID = '9de2d234-993d-4613-8abe-a83aad80ec2c'
+    NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+    HTTP_PROXY  = 'http://http.docker.internal:3128'
+    HTTPS_PROXY = 'http://http.docker.internal:3128'
+    NO_PROXY    = 'localhost,127.0.0.1'
     }
 
     stages {
@@ -12,7 +15,7 @@ pipeline {
                 docker {
                     image 'node:18'
                     reuseNode true
-                    args '--dns 8.8.8.8 --dns 1.1.1.1'
+                    
                 }
             }
             steps {
@@ -32,7 +35,7 @@ pipeline {
                 docker {
                     image 'node:18'
                     reuseNode true
-                    args '--dns 8.8.8.8 --dns 1.1.1.1'
+                    
                 }
             }
             steps {
@@ -48,7 +51,7 @@ pipeline {
                 docker {
                     image 'node:18'
                     reuseNode true
-                    args '--dns 8.8.8.8 --dns 1.1.1.1'
+                    
                 }
             }
             steps {
